@@ -1,0 +1,10 @@
+[linux]
+
+remote-host-one
+remote-host-two
+remote-host-three
+
+[linux:vars]
+
+ansible_user=root
+ansible_password=mypassword

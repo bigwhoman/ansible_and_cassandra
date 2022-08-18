@@ -1,0 +1,115 @@
+# - name: ilovenano
+#   hosts: linux
+#   tasks:
+#     - name: install dependancies
+#       apt:
+#        name: 
+#        - openjdk-8-jdk
+#        - curl
+#        - python3.8
+#        state: latest
+
+
+- name: ilovenano
+  hosts: linux
+  tasks:
+    - name: install dependancies
+      yum:
+       name: 
+       - java-1.8.0-openjdk
+       - curl
+       - initscripts
+       state: latest
+    - name: install cassandra and config firewalls
+      shell: |
+          cat <<EOF | tee -a /etc/yum.repos.d/cassandra311x.repo 
+          [cassandra] 
+          name=Apache Cassandra 
+          baseurl=https://www.apache.org/dist/cassandra/redhat/40x/ 
+          gpgcheck=1 
+          repo_gpgcheck=1 
+          gpgkey=https://www.apache.org/dist/cassandra/KEYS 
+          EOF
+          yum -y install cassandra
+          sed -i -e 's/\r$//' systemctl
+          systemctl stop cassandra
+          rm -rf /var/lib/cassandra/data/system/*
+          yum makecache
+          yum install -y epel-release
+          yum install -y ufw
+          ufw allow 7000 
+          ufw allow 7001  
+          ufw allow 7199 
+          ufw allow 9042  
+          ufw allow 9160 
+          ufw allow 9142
+          ufw enable
+      args:
+        executable: /bin/bash
+    # - name: Example Playbook for the locp.cassandra Role
+
+    #   hosts: cassandra
+
+    #   remote_user: root
+
+    #   vars:
+    #     cassandra_configuration:
+    #       authenticator: PasswordAuthenticator
+    #       cluster_name: MyCassandraCluster
+    #       commitlog_directory: /data/cassandra/commitlog
+    #       commitlog_sync: periodic
+    #       commitlog_sync_period_in_ms: 10000
+    #       data_file_directories:
+    #         - /data/cassandra/data
+    #       endpoint_snitch: GossipingPropertyFileSnitch
+    #       hints_directory: "/data/cassandra/hints"
+    #       listen_address: "{{ ansible_default_ipv4.address }}"
+    #       # For a sensible value to set num_tokens to, please see
+    #       # https://cassandra.apache.org/doc/latest/getting_started/production.html#tokens
+    #       num_tokens: 4
+    #       partitioner: org.apache.cassandra.dht.Murmur3Partitioner
+    #       saved_caches_directory: /data/cassandra/saved_caches
+    #       seed_provider:
+    #         - class_name: "org.apache.cassandra.locator.SimpleSeedProvider"
+    #           parameters:
+    #             # This sets the seed to the first node in the Ansible group called
+    #             # cassandra.
+    #             - seeds: "{{ hostvars[groups['cassandra'][0]]['ansible_default_ipv4'].address }}"
+    #       start_native_transport: true
+    #     cassandra_configure_apache_repo: true
+    #     # Create an alternative directories structure for the Cassandra data.
+    #     # In this example, the will be a directory called /data owned by root
+    #     # with rwxr-xr-x permissions.  It will have a series of sub-directories
+    #     # all of which will be defaulted to being owned by the cassandra user
+    #     # with rwx------ permissions.
+    #     cassandra_directories:
+    #       root:
+    #         group: root
+    #         mode: "0755"
+    #         owner: root
+    #         paths:
+    #           - /data
+    #       data:
+    #         paths:
+    #           - /data/cassandra
+    #           - /data/cassandra/commitlog
+    #           - /data/cassandra/data
+    #           - /data/cassandra/hints
+    #           - /data/cassandra/saved_caches
+    #     cassandra_regex_replacements:
+    #       - path: cassandra-env.sh
+    #         line: 'MAX_HEAP_SIZE="{{ cassandra_max_heapsize_mb }}M"'
+    #         regexp: '^#MAX_HEAP_SIZE="4G"'
+    #       - path: cassandra-env.sh
+    #         line: 'HEAP_NEWSIZE="{{ cassandra_heap_new_size_mb }}M"'
+    #         regexp: '^#HEAP_NEWSIZE="800M"'
+    #       - path: cassandra-rackdc.properties
+    #         line: 'dc=DC1'
+    #         regexp: '^dc='
+    #       - path: cassandra-rackdc.properties
+    #         line: 'rack=RACK1'
+    #         regexp: '^rack='
+    #     cassandra_repo_apache_release: 40x
+
+    #   roles:
+    #     - role: locp.cassandra
