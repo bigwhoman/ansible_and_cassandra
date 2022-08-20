@@ -14,16 +14,16 @@
   hosts: linux
   tasks:
     # - debug: var=hostvars[inventory_hostname]['ansible_default_ipv4']['address']
-    - name: install dependancies
-      yum:
-       name:
-      #  - java-1.8.0-openjdk
-      #  - curl
-      #  - initscripts
-      #  - epel-release
-      #  - firewalld
-       - cassandra
-       state: latest
+    # - name: install dependancies
+    #   yum:
+    #    name:
+    #   #  - java-1.8.0-openjdk
+    #   #  - curl
+    #   #  - initscripts
+    #   #  - epel-release
+    #   #  - firewalld
+    #   #  - cassandra
+    #    state: latest
 
     - name: install cassandra and fix systemctl
       shell: |
@@ -57,19 +57,6 @@
       ufw:
          state: enabled
          policy: allow
-    
-    - name: allow ports
-      ufw:
-        rule: allow
-        port: "{{ item }}"
-        proto: tcp
-      with_items:
-      - 7000
-      - 7001
-      - 7199
-      - 9042
-      - 9160
-      - 9142
         
     # - name: fix firewall setting
       # firewalld: 

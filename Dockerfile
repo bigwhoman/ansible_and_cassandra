@@ -18,4 +18,3 @@ COPY configs/ansible.cfg /etc/ansible/ansible.cfg
 COPY configs/hosts /etc/ansible/hosts
 COPY configs/playbook.yml /home/playbook.yml
 COPY configs/cassandra.yaml /home/cassandra.yaml
-RUN ansible-galaxy collection install community.general
