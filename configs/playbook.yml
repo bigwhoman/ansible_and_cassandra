@@ -13,7 +13,7 @@
 - name: install and set cassandra
   hosts: linux
   tasks:
-    # - debug: var=hostvars[inventory_hostname]['ansible_default_ipv4']['address']
+    - debug: var=hostvars[inventory_hostname]['ansible_default_ipv4']['address']
     # - name: install dependancies
     #   yum:
     #    name:
@@ -25,9 +25,8 @@
     #   #  - cassandra
     #    state: latest
 
-    - name: install cassandra and fix systemctl
+    - name: stop cassandra and remove default nodes
       shell: |
-          sed -i -e 's/\r$//' /bin/systemctl
           systemctl stop cassandra
           rm -rf /var/lib/cassandra/data/system/*
       args:
@@ -38,25 +37,18 @@
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
       with_items:
-      - {src: cassandra.yaml, dest: /etc/cassandra/conf/cassandra.yaml}
-      - {src: cassandra.yaml, dest: /etc/cassandra/default.conf/cassandra.yaml}
+      - {src: cassandra.yaml, dest: /etc/cassandra/cassandra.yaml}
 
     - name: change config_file
       replace:
-        path: /etc/cassandra/conf/cassandra.yaml
+        path: /etc/cassandra/cassandra.yaml
         regexp: 'aremote-host-one'
         replace: "{{ ansible_default_ipv4.address }}"
 
-    - name: change config_file_2
-      replace:
-        path: /etc/cassandra/default.conf/cassandra.yaml
-        regexp: 'aremote-host-one'
-        replace: "{{ ansible_default_ipv4.address }}"
-
-    - name: start ufw
-      ufw:
-         state: enabled
-         policy: allow
+    # - name: start ufw
+    #   ufw:
+    #      state: enabled
+    #      policy: allow
         
     # - name: fix firewall setting
       # firewalld: 
@@ -72,7 +64,7 @@
       # - 9160
       # - 9142
     
-    - name: start cassandra
+    - name: restart cassandra
       service:
          name: cassandra
-         state: started
+         state: restarted
